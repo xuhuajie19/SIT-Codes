@@ -1,0 +1,7 @@
+{
+  "name": "TopSort",
+  "scripts": {
+    "build": "tsc TopSort.ts --target \"es2016\"",
+    "start": "node TopSort.js"
+  }
+}

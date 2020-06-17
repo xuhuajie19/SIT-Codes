@@ -1,0 +1,10 @@
+{
+	"scripts": {
+		"build": "tsc lab4.ts --target \"es6\"",
+		"start": "node lab4.js"
+	},
+	"dependencies": {
+		"@types/node": "^10.9.4",
+		"readline-sync": "^1.4.9"
+	}
+}

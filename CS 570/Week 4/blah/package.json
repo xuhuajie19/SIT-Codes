@@ -1,0 +1,6 @@
+{
+    "scripts": {
+        "build": "tsc blah.ts --target \"es2016\"",
+        "start": "node blah.js"
+    }
+}

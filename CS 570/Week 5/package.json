@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "build": "tsc lab5.ts --target \"es2016\"",
+    "start": "node lab5.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^10.9.4",
+    "@types/readline-sync": "^1.4.3"
+  },
+  "description": ""
+}

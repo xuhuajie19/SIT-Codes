@@ -1,0 +1,11 @@
+{
+  "name": "sortedset",
+  "scripts": {
+    "build": "tsc sortedset.ts --target \"es2016\"",
+    "start": "node sortedset.js"
+  },
+  "dependencies": {
+    "@types/node": "^10.12.0",
+    "@types/readline-sync": "^1.4.3"
+  }
+}

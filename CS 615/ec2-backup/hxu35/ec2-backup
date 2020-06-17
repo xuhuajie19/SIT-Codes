@@ -1,0 +1,118 @@
+#!/usr/pkg/bin/bash
+
+if [ -z $EC2_BACKUP_FLAGS_AWS]; then
+  EC2_BACKUP_FLAGS_AWS="--instance-type t1.micro"
+fi
+
+if [ -z $EC2_BACKUP_FLAGS_SSH]; then
+  EC2_BACKUP_FLAGS_SSH="-i /root/.ssh/ec2-backup"
+fi
+
+volumeid0=""
+#workingdir=""
+function Usage(){
+  echo "Usage: ec2-backup [-h] [-v volume-id] dir"
+  exit 1
+}
+
+while getopts 'hv:' c
+do
+  case $c in
+    h)
+      Usage
+      exit 1
+      ;;
+    v)
+      $volumeid0=$OPTARG
+      ;;
+    :)
+      #$workingdir=$1
+      ;;
+    ?)
+      echo "Invalid argument"
+      exit 1
+      ;;
+  esac
+done
+workingdir="$(cd "$1" ; pwd)"
+
+#Create a new security group
+sgid=$(aws ec2 create-security-group --group-name my-sg --description "temp" | jq -r '.GroupId')
+
+#Allow SSH traffic
+aws ec2 authorize-security-group-ingress --group-name my-sg --protocol tcp --port 22 --cidr 0.0.0.0/0
+
+#Create a new instance
+temp=$(aws ec2 run-instances --key-name ec2-backup --image-id ami-569ed93c \
+	${EC2_BACKUP_FLAGS_AWS})
+
+if [ -n "$EC2_BACKUP_VERBOSE" ]; then
+  echo $temp
+fi
+
+#Sleep until the instance is ready
+sleep 300
+
+#Get the instance information by getting instance information, sorting by the launch time, and parsing the jsons
+instanceid0=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].[LaunchTime,InstanceId][] | sort_by(@, &[0])'[-1][1] --output text)
+publicdnsname0=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].[LaunchTime,PublicDnsName][] | sort_by(@, &[0])'[-1][1] --output text)
+zone0=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].[LaunchTime,Placement.AvailabilityZone][] | sort_by(@, &[0])'[-1][1] --output text)
+
+#Add the security group to the instance
+aws ec2 modify-instance-attribute --groups $sgid --instance-id $instanceid0
+
+if [ -n "$volumeid0" ]; then
+  #If the volume-id is specified, then attach the volume to the new instance
+  aws ec2 attach-volume --volume-id $volumeid0 --instance-id $instanceid0 --device /dev/sdf
+  sleep 1
+else
+  #Create a new volume
+  size=$(($(($(du -g "$workingdir" | cut -f 1)))*2))
+
+  if [ -n "$EC2_BACKUP_VERBOSE" ]; then
+	  echo "The size of the volume will be $size GB"
+  fi
+  
+  #The volume should be in the same zone as the instance
+  volumeid0=$(aws ec2 create-volume --availability-zone $zone0 --size $size | jq -r '.VolumeId')
+  
+  #Wait until the volume is ready
+  sleep 60
+
+  #Attach the volume to the instance
+  temp=$(aws ec2 attach-volume --device /dev/sdf --instance-id $instanceid0 --volume-id $volumeid0)
+  if [ -n "$EC2_BACKUP_VERBOSE" ]; then
+	  echo $temp
+  fi
+  sleep 1
+fi
+
+#echo "The volume id created for the backup is: " $volumeid0
+echo $volumeid0
+
+#teleport the tar to remote instance as /root/a.tar
+temp=$(tar cf a.tar ${workingdir})
+if [ -n "$EC2_BACKUP_VERBOSE" ]; then
+	echo $temp
+fi
+
+temp=$(scp ${EC2_BACKUP_FLAGS_SSH} -r a.tar root@$publicdnsname0:/root/)
+if [ -n "$EC2_BACKUP_VERBOSE" ]; then
+	echo $temp
+fi
+
+#login on the instance
+temp=$(ssh -t ${EC2_BACKUP_FLAGS_SSH} root@$publicdnsname0 "cd /root/;dd if=a.tar of=/dev/sdf")
+if [ -n "$EC2_BACKUP_VERBOSE" ]; then
+	echo $temp
+fi
+
+#Terminate Instance
+temp=$(aws ec2 terminate-instances --instance-ids $instanceid0)
+if [ -n "$EC2_BACKUP_VERBOSE" ]; then
+	echo $temp
+fi
+
+sleep 60
+aws ec2 delete-security-group --group-name my-sg
+rm a.tar

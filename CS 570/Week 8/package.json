@@ -1,0 +1,11 @@
+{
+  "name": "lab7",
+  "scripts": {
+    "build": "tsc lab7.ts --target \"es2016\"",
+    "start": "node lab7.js"
+  },
+  "dependencies": {
+    "@types/node": "^10.12.0",
+    "@types/readline-sync": "^1.4.3"
+  }
+}

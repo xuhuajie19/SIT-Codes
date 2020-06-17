@@ -1,0 +1,7 @@
+{
+  "name": "trie-article",
+  "scripts": {
+    "build": "tsc trie-article.ts --target \"es2016\"",
+    "start": "node trie-article.js"
+  }
+}

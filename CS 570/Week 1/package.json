@@ -1,0 +1,6 @@
+{
+    "scripts": {
+        "build": "tsc lab1.ts",
+        "start": "node lab1.js"
+    }
+}

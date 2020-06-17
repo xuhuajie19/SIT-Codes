@@ -1,0 +1,7 @@
+{
+  "name": "lab7",
+  "scripts": {
+    "build": "tsc hash.ts --target \"es2016\"",
+    "start": "node hash.js"
+  }
+}

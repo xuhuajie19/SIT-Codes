@@ -1,0 +1,12 @@
+{
+	"scripts": {
+		"build": "tsc lab11.ts --target \"es6\"",
+		"start": "node lab11.js"
+	},
+	"dependencies": {
+		"@types/node": "^10.12.10",
+		"fs": "0.0.1-security",
+		"path": "^0.12.7",
+		"readline-sync": "^1.4.9"
+	}
+}

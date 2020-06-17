@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "build": "tsc circular.ts --target \"es2016\"",
+    "start": "node circular.js"
+  },
+  "dependencies": {
+    "@types/node": "^10.11.4",
+    "@types/readline-sync": "^1.4.3"
+  }
+}

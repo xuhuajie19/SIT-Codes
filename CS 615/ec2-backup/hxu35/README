@@ -1,0 +1,32 @@
+please run make install
+
+> Why you choose the programming language
+I used Bash in version 1, so just continue.
+
+> The approach you took
+I used a package called jq to parse the json output and it worked well, which saved me a lot of time. 
+Also, I learnt how to use scp and the environment variable from ec2-backup-prep.sh.
+
+> Any considerations
+The version of openssl used in NetBSD Python 3.7 is still 1.0.1, which caused a lot of warning.
+
+Is there a better way to wait for the instance to complete initialization instead of "sleep 34"?
+
+> Misc
+Good coding habit and time management really matters.
+
+> What changed in this version
+
+- Makefile will install bash while running "make install"
+
+- The program will detect if the environment variables are already set at the beginning
+
+- The ssh will find the key file because I changed ~/.ssh to /root/.ssh
+
+- Sometimes the program need to sleep 300 seconds before the instance is ready 
+
+- A lot of bugs fixed
+
+- The program will write backup files to the raw disk now. Thanks a lot for the hints provided by professor.
+
+- But the Openssl version warning exists even after I manually updated openssl to 1.0.2 and "openssl version -a" showed 1.0.2, maybe the problem of NetBSD system itself?
